@@ -666,7 +666,7 @@ flavor breakfl[] = {
 
 // for easy68k
 flavor haltfl[] = {
-	{Immediate, 0, 0, zeroOp, 0, 0xFFFF, 0}
+	{0, 0, 0, simHalt, 0, 0xFFFF, 0xFFFFFFFF}
 };
 
 

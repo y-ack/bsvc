@@ -165,6 +165,7 @@ void twoReg(int mask, int size, opDescriptor *source, opDescriptor *dest, int *e
 void oneReg(int mask, int size, opDescriptor *source, opDescriptor *dest, int *errorPtr);
 void moveUSP(int mask, int size, opDescriptor *source, opDescriptor *dest, int *errorPtr);
 void link(int mask, int size, opDescriptor *source, opDescriptor *dest, int *errorPtr);
+void simHalt(int mask, int size, opDescriptor *source, opDescriptor *dest, int *errorPtr);
 void output(int data, int size);
 int effAddr(opDescriptor *operand);
 void extWords(opDescriptor *op, int size, int *errorPtr);

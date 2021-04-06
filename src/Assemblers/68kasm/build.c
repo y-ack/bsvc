@@ -608,3 +608,17 @@ link(int mask, int size, opDescriptor *source, opDescriptor *dest, int *errorPtr
 	if (dest->data < -32768 || dest->data > 32767)
 		NEWERROR(*errorPtr, INV_16_BIT_DATA);
 }
+
+// Builds the simulator EASY68k SIMHALT instruction
+void
+simHalt(int mask, int size, opDescriptor *source, opDescriptor *dest, int *errorPtr)
+{
+	if (!pass2) {
+		loc += 4;
+		return;
+	}
+	output(0xFFFF, WORD);
+	loc += 2;
+	output(0xFFFF, WORD);
+	loc += 2;
+}
