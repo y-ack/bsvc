@@ -80,6 +80,8 @@ initObj(char *name)
 	}
 	// Output S-record file header
 	fputs("S004000020DB\n", objFile);
+	// Easy68k: (symbol info?)
+	// S021000036384B50524F47202020323043524541544544204259204541535936384B6D
 	lineFlag = FALSE;
 }
 
@@ -175,6 +177,7 @@ finishObj(void)
 
 	// Write out a termination S-record and close the file
 	fputs("S9030000FC\n", objFile);
+	//Easy68K: S804001000EB
 	if (ferror(objFile)) {
 		fputs(objErrorMsg, stderr);
 		exit(1);
