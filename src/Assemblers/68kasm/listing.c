@@ -62,6 +62,7 @@
 
 /* Declarations of global variables */
 extern int loc;
+extern int startAddr;
 extern char pass2, cexFlag, continuation;
 extern char line[256];
 extern FILE *listFile;
@@ -82,6 +83,7 @@ initList(char *name)
 		puts("Can't open listing file");
 		exit(1);
 	}
+	fprintf(listFile, "%08X Starting Address\n", 0x1000);
 }
 
 void

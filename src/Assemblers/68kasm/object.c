@@ -61,6 +61,7 @@
 // and checksum) that can be in one S-record
 #define SRECSIZE  36
 
+extern int startAddr;
 extern char line[256];
 extern FILE *objFile;
 
@@ -80,8 +81,9 @@ initObj(char *name)
 	}
 	// Output S-record file header
 	fputs("S004000020DB\n", objFile);
-	// Easy68k: (symbol info?)
-	// S021000036384B50524F47202020323043524541544544204259204541535936384B6D
+	// Easy68k:
+	// S0sz0000 6 8 K P R O G       2 0 C R E A T E D   B Y   E AS Y 6 8 K
+	// S021000036384B50524F47202020323043524541544544204259204541535936384B 6D
 	lineFlag = FALSE;
 }
 
@@ -175,9 +177,15 @@ finishObj(void)
 	if (lineFlag)
 		writeObj();
 
-	// Write out a termination S-record and close the file
-	fputs("S9030000FC\n", objFile);
 	//Easy68K: S804001000EB
+	//S8 record has three byte starting execution address
+	char buf[14];
+	snprintf(buf, 14, "S804%06XEB\n", startAddr);
+	fputs(buf, objFile);
+	
+	// Write out a termination S-record and close the file
+	//	fputs("S9030000FC\n", objFile);
+
 	if (ferror(objFile)) {
 		fputs(objErrorMsg, stderr);
 		exit(1);

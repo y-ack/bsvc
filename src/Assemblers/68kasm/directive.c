@@ -38,6 +38,7 @@
 #include "asm.h"
 
 extern int loc;
+extern int startAddr;
 extern char pass2, endFlag, listFlag;
 symbolDef *define();
 
@@ -94,9 +95,31 @@ org(int size, char *label, char *op, int *errorPtr)
 void
 End(int size, char *label, char *op, int *errorPtr)
 {
+	int addrRef;
+	int backRef;
+
 	if (size)
 		NEWERROR(*errorPtr, INV_SIZE_CODE);
-	endFlag = TRUE;
+	if (!*op) {
+		NEWERROR(*errorPtr, SYNTAX);
+		return;
+	}
+	op = eval(op, &addrRef, &backRef, errorPtr);
+	if (*errorPtr < SEVERE && !backRef) {
+		NEWERROR(*errorPtr, INV_FORWARD_REF);
+	} else if (*errorPtr < ERROR) {
+		if (isspace(*op) || !*op) {
+			startAddr = addrRef;
+			/* Define the label attached to this directive, if any */
+			if (*label)
+				define(label, loc, pass2, errorPtr);
+			/* Show new location counter on listing */
+			listLoc();
+
+			endFlag = TRUE;
+		} else
+			NEWERROR(*errorPtr, SYNTAX);
+	}
 }
 
 

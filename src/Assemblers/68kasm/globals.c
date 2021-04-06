@@ -20,6 +20,7 @@
 /* General */
 
 int loc;			/* The assembler's location counter */
+int startAddr;      /* Execution start address */
 char pass2;			/* Flag telling whether or not it's the second pass */
 char endFlag;			/* Flag set when the END directive is encountered */
 

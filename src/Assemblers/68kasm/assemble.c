@@ -49,6 +49,7 @@
 
 
 extern int loc;			/* The assembler's location counter */
+extern int startAddr;   /* execution start address (set by END) */
 extern char pass2;		/* Flag set during second pass */
 extern char endFlag;		/* Flag set when the END directive is encountered */
 extern char continuation;	/* TRUE if the listing line is a continuation */
@@ -98,6 +99,11 @@ processFile(void)
 			pass2 = TRUE;
 		}
 		rewind(inFile);
+	}
+	if (listFlag) {
+		// rewrite the start addr as the beginning of the listing for Easy68K
+		fseek(listFile, 0, 0); //rewind to char 0 of listing
+		fprintf(listFile, "%08X Starting Address", startAddr);
 	}
 }
 
