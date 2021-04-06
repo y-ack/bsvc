@@ -664,6 +664,11 @@ flavor breakfl[] = {
 	{0, 0, 0, zeroOp, 0, 0x4848, 0}
 };
 
+// for easy68k
+flavor haltfl[] = {
+	{Immediate, 0, 0, zeroOp, 0, 0xFFFF, 0}
+};
+
 
 /* Define a macro to compute the length of a flavor list */
 
@@ -787,6 +792,7 @@ instruction instTable[] = {
 	{"SGT", sgtfl, flavorCount(sgtfl), TRUE, NULL},
 	{"SHI", shifl, flavorCount(shifl), TRUE, NULL},
 	{"SHS", sccfl, flavorCount(sccfl), TRUE, NULL},
+	{"SIMHALT", haltfl, flavorCount(haltfl), TRUE, NULL},
 	{"SLE", slefl, flavorCount(slefl), TRUE, NULL},
 	{"SLO", scsfl, flavorCount(scsfl), TRUE, NULL},
 	{"SLS", slsfl, flavorCount(slsfl), TRUE, NULL},
