@@ -128,12 +128,12 @@ main(int argc, char *argv[])
 		p = outName + strlen(outName);
 
 	if (listFlag) {
-		strcpy(p, ".lis");
+		strcpy(p, ".L68");
 		initList(outName);
 	}
 
 	if (objFlag) {
-		strcpy(p, ".h68");
+		strcpy(p, ".S68");
 		initObj(outName);
 	}
 
