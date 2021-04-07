@@ -169,11 +169,16 @@ assemble(char *line, int *errorPtr)
 					return;
 				sourceParsed = TRUE;
 			}
+
 			if (!destParsed && flavorPtr->dest) {
+				if (isspace(*p)) p = skipSpace(p);
 				if (*p != ',') {
 					NEWERROR(*errorPtr, SYNTAX);
 					return;
 				}
+				p++;
+				if (isspace(*p)) p = skipSpace(++p);
+				p--;
 				p = opParse(p + 1, &dest, errorPtr);
 				if (*errorPtr > SEVERE)
 					return;
