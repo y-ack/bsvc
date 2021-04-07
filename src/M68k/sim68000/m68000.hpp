@@ -207,6 +207,7 @@ private:
   int ExecuteTST(int opcode, std::string &description, int trace);
   int ExecuteUNLK(int opcode, std::string &description, int trace);
   int ExecuteInvalid(int opcode, std::string &description, int trace);
+  int ExecuteSIMHALT(int opcode, std::string &description, int trace);
 
   int ExecuteBusError(int opcode, std::string &description, int trace);
   int ExecuteAddressError(int opcode, std::string &description, int trace);
@@ -233,6 +234,8 @@ private:
 
   int ProcessException(int vector);
 
+  int handleIOInterrupt();
+  
   struct PendingInterrupt {
     PendingInterrupt(long l, BasicDevice *d) : level(l), device(d) { }
     long level;

@@ -1705,7 +1705,7 @@ int m68000::ExecuteBSR(int opcode, std::string &trace_record, int trace) {
     if ((status = Poke(addr, register_value[PC_INDEX], LONG)) != EXECUTE_OK)
       return (status);
   }
-
+  
   SetRegister(PC_INDEX, register_value[PC_INDEX] + displacement, LONG);
 
   if (trace)
@@ -4441,6 +4441,20 @@ int m68000::ExecuteBREAK(int, std::string &trace_record, int trace) {
   return (EXECUTE_OK);
 }
 
+// Execute EASY68k's SIMHALT instruction
+// Execute the 'BREAK' instruction
+int m68000::ExecuteSIMHALT(int, std::string &trace_record, int trace) {
+
+  // Put the processor in our "fake" break state so the simulator will
+  // stop running a program.
+  myState = BREAK_STATE;
+
+  if (trace)
+    trace_record += "{Mnemonic {SIMHALT}} ";
+
+  return (EXECUTE_OK);
+}
+
 // Execute the 'SUB' instruction
 int m68000::ExecuteSUB(int opcode, std::string &trace_record, int trace) {
   int status, size, in_register_flag;
@@ -4987,6 +5001,9 @@ int m68000::ExecuteInvalid(int, std::string &trace_record, int trace) {
 int m68000::ProcessException(int vector) {
   int status;
 
+  // special case the display vector and simulate the EASY68k tasks
+  if (vector == 32 + 15) return handleIOInterrupt();
+  
   // Copy the SR to a temp
   Register sr = register_value[SR_INDEX];
 
@@ -5015,6 +5032,63 @@ int m68000::ProcessException(int vector) {
   SetRegister(PC_INDEX, service_address, LONG);
 
   return (EXECUTE_OK);
+}
+
+int m68000::handleIOInterrupt() {
+  int status;
+  Register d0 = register_value[D0_INDEX];
+  //char *inStr;
+  //char buf[256];
+  //printf("d0 = %i\n",(int)d0);
+  
+  switch ((char)d0) {
+  case 0: //Display string at (A1), D1.W bytes long (max 255) with CRLF.
+    //inStr = Peek(register_value[A0_INDEX + 1], ???
+    break;
+  case 1: //Display string at (A1), D1.W bytes long (max 255) without CRLF.
+    break;
+  case 2://Read keyboard string starting at (A1) length returned in D1.W(max80)
+    break;
+  case 3: //Display number in D1.L in decimal in smallest field.
+    printf("%li", (long)register_value[D0_INDEX+1]);
+    return (EXECUTE_OK);
+    break;
+  case 4: //Read a number from keyboard into D1.L.
+    break;
+  case 5: //Read single char from keyboard into D1.B.
+    break;
+  case 6: //Display single char in D1.B.
+    break;
+  case 7: //Set D1.B to 1 if keyboard input is pending, otherwise set to 0.
+    break;
+  case 8: //Return time in hundredths of a second since midnight in D1.L.
+    break;
+  case 9: //Terminate the program.
+    break;
+  case 10://Print null terminated character string at (A1) to default printer.
+    break;
+  case 11://Set Cursor Position; Return Cursor Position, Clear Screen.
+    break;
+  case 12://Keyboard Echo.
+    break;
+  // end teeside compatible trap codes
+  case 13://Display the NULL terminated string at (A1) (max 255) with CRLF.
+  case 14://Display the NULL terminated string at (A1) (max 255) without CRLF.
+    unsigned int inChar;
+    Address inStrPtr = register_value[A0_INDEX+1];
+    while ((status = Peek(inStrPtr++, inChar, BYTE)) == EXECUTE_OK
+           && inChar) {
+      printf("%c",(char)inChar);
+    }
+    if (status != EXECUTE_OK) return (status);
+    if ((char)d0 == 13) printf("%c",'\n');
+    return (EXECUTE_OK);
+    break;
+    //  case 15://Display the contents of D1.L converted to number base (2 to 36)
+    //break;
+  }
+  
+  return (EXECUTE_ILLEGAL_INSTRUCTION);
 }
 
 // Execute the Address Error Cycle
