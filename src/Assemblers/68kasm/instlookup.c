@@ -44,6 +44,9 @@
 
 extern instruction instTable[];
 extern int tableSize;
+extern char *lineStart;
+extern int errorCol;
+#define SETERRCOL(pos) errorCol = pos - lineStart;
 
 char *
 instLookup(char *p, instruction * (*instPtrPtr), char *sizePtr, int *errorPtr)
@@ -71,13 +74,16 @@ instLookup(char *p, instruction * (*instPtrPtr), char *sizePtr, int *errorPtr)
 			else {
 				*sizePtr = 0;
 				NEWERROR(*errorPtr, INV_SIZE_CODE);
+				SETERRCOL(p);
 			}
 			p += 2;
 		} else {
 			NEWERROR(*errorPtr, SYNTAX);
+			SETERRCOL(p);
 			return NULL;
 	} else if (!isspace(*p) && *p) {
 		NEWERROR(*errorPtr, SYNTAX);
+		SETERRCOL(p);
 		return NULL;
 	} else
 		*sizePtr = 0;
@@ -97,6 +103,7 @@ instLookup(char *p, instruction * (*instPtrPtr), char *sizePtr, int *errorPtr)
 		return p;
 	} else {
 		NEWERROR(*errorPtr, INV_OPCODE);
+		SETERRCOL(p);
 		return NULL;
 	}
 }

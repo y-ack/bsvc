@@ -55,6 +55,9 @@ extern char endFlag;		/* Flag set when the END directive is encountered */
 extern char continuation;	/* TRUE if the listing line is a continuation */
 extern int lineNum;
 extern int errorCount, warningCount;
+extern int errorCol;
+extern char *lineStart;
+#define SETERRCOL(pos) errorCol = pos - lineStart;
 
 extern char line[256];		/* Source line */
 extern FILE *inFile;		/* Input file */
@@ -78,6 +81,7 @@ processFile(void)
 		while (!endFlag && fgets(line, 256, inFile)) {
 			strcap(capLine, line);
 			error = OK;
+			errorCol = -1;
 			continuation = FALSE;
 			if (pass2 && listFlag)
 				listLoc();
@@ -89,9 +93,9 @@ processFile(void)
 					warningCount++;
 				if (listFlag) {
 					listLine();
-					printError(listFile, error, -1);
+					printError(listFile, error, -1, errorCol, line);
 				}
-				printError(stderr, error, lineNum);
+				printError(stderr, error, lineNum, errorCol, line);
 			}
 			lineNum++;
 		}
@@ -122,6 +126,7 @@ assemble(char *line, int *errorPtr)
 	unsigned short mask, i;
 
 	p = start = skipSpace(line);
+	lineStart = start;
 	if (*p && !iscomment(*p)) {
 		i = 0;
 		do {
@@ -174,38 +179,41 @@ assemble(char *line, int *errorPtr)
 				if (isspace(*p)) p = skipSpace(p);
 				if (*p != ',') {
 					NEWERROR(*errorPtr, SYNTAX);
+					SETERRCOL(p);
 					return;
 				}
 				p++;
-				if (isspace(*p)) p = skipSpace(++p);
+				if (isspace(*p)) p = skipSpace(p);
 				p--;
 				p = opParse(p + 1, &dest, errorPtr);
 				if (*errorPtr > SEVERE)
 					return;
 				if (!isspace(*p) && *p) {
 					NEWERROR(*errorPtr, SYNTAX);
+					SETERRCOL(p);
 					return;
 				}
 				destParsed = TRUE;
 			}
 			if (!flavorPtr->source) {
-				mask = pickMask(size, flavorPtr, errorPtr);
+				mask = pickMask(p, size, flavorPtr, errorPtr);
 				(*flavorPtr->exec)(mask, errorPtr);
 				return;
 			} else if ((source.mode & flavorPtr->source) &&
 				   !flavorPtr->dest) {
 				if (!isspace(*p) && *p) {
 					NEWERROR(*errorPtr, SYNTAX);
+					SETERRCOL(p);
 					return;
 				}
-				mask = pickMask(size, flavorPtr, errorPtr);
+				mask = pickMask(p, size, flavorPtr, errorPtr);
 				(*flavorPtr->exec)(mask, size,
 						   &source, &dest,
 						   errorPtr);
 				return;
 			} else if (source.mode & flavorPtr->source
 				   && dest.mode & flavorPtr->dest) {
-				mask = pickMask(size, flavorPtr, errorPtr);
+				mask = pickMask(p, size, flavorPtr, errorPtr);
 				(*flavorPtr->exec)(mask, size,
 						   &source, &dest,
 						   errorPtr);
@@ -213,12 +221,13 @@ assemble(char *line, int *errorPtr)
 			}
 		}
 		NEWERROR(*errorPtr, INV_ADDR_MODE);
+		SETERRCOL(p);
 	}
 }
 
 
 int
-pickMask(int size, flavor * flavorPtr, int *errorPtr)
+pickMask(char *p, int size, flavor * flavorPtr, int *errorPtr)
 {
 	if (!size || size & flavorPtr->sizes) {
 		if (size & (BYTE | SHORT))
@@ -228,6 +237,6 @@ pickMask(int size, flavor * flavorPtr, int *errorPtr)
 		return flavorPtr->longmask;
 	}
 	NEWERROR(*errorPtr, INV_SIZE_CODE);
-
+	SETERRCOL(p);	
 	return flavorPtr->wordmask;
 }

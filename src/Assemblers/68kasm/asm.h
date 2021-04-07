@@ -57,7 +57,8 @@
 // The NEWERROR macros updates the error variable var only if the
 // new error code is more severe than all previous errors.  Throughout
 // ASM this is the standard means of reporting errors.
-#define NEWERROR(var, code)	if ((code & SEVERITY) > var) var = code
+#define NEWERROR(var, code)	if ((code & SEVERITY) > var) var = code;
+
 
 // Symbol table definitions
 
@@ -139,7 +140,7 @@ typedef struct {
 // Prototypes.
 void processFile(void);
 void assemble(char *line, int *errorPtr);
-int pickMask(int size, flavor *flavorPtr, int *errorPtr);
+int pickMask(char *p, int size, flavor *flavorPtr, int *errorPtr);
 void moveq(int mask, int size, opDescriptor *source, opDescriptor *dest, int *errorPtr);
 void move(int mask, int size, opDescriptor *source, opDescriptor *dest, int *errorPtr);
 void zeroOp(int mask, int size, int *errorPtr);
@@ -177,7 +178,7 @@ void dc(int size, char *label, char *op, int *errorPtr);
 char *collect(char *s, char *d);
 void dcb(int size, char *label, char *op, int *errorPtr);
 void ds(int size, char *label, char *op, int *errorPtr);
-void printError(FILE *outFile, int errorCode, int lineNum);
+void printError(FILE *outFile, int errorCode, int lineNum, int col, char *line);
 char *eval(char *p, int *valuePtr, int *refPtr, int *errorPtr);
 char *evalNumber(char *p, int *numberPtr, int *refPtr, int *errorPtr);
 int precedence(int op);

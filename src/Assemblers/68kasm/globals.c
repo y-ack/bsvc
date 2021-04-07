@@ -39,6 +39,8 @@ int lineNum;			/* Source line number */
 char *listPtr;			/* Pointer to buffer where a listing line is assembled */
 char continuation;		/* TRUE if the listing line is a continuation */
 
+int errorCol;           /* column error was detected */
+char *lineStart;        /* position of line start for error column */
 
 /* Option flags with default values */
 

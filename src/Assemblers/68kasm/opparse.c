@@ -57,10 +57,13 @@
 
 extern char pass2;
 extern unsigned char absLongFlag;
-
+extern char *lineStart;
+extern int errorCol;
 
 #define isTerm(c)   (isspace(c) || (c == ',') || c == '\0')
 #define isRegNum(c) ((c >= '0') && (c <= '7'))
+#define SETERRCOL(pos) errorCol = pos - lineStart;
+
 
 char *
 opParse(char *p, opDescriptor * d, int *errorPtr)
@@ -75,6 +78,7 @@ opParse(char *p, opDescriptor * d, int *errorPtr)
 				return p;
 			} else {
 				NEWERROR(*errorPtr, SYNTAX);
+				SETERRCOL(p);
 				return NULL;
 			}
 		} else
@@ -138,6 +142,7 @@ opParse(char *p, opDescriptor * d, int *errorPtr)
 					return p + 9;
 				} else {
 					NEWERROR(*errorPtr, SYNTAX);
+					SETERRCOL(p);
 					return NULL;
 			} else if (p[6] == ')') {
 				/* Default index register size is Word */
@@ -145,6 +150,7 @@ opParse(char *p, opDescriptor * d, int *errorPtr)
 				return p + 7;
 			} else {
 				NEWERROR(*errorPtr, SYNTAX);
+				SETERRCOL(p);
 				return NULL;
 			}
 		}
@@ -187,6 +193,7 @@ opParse(char *p, opDescriptor * d, int *errorPtr)
 					return p + 9;
 				} else {
 					NEWERROR(*errorPtr, SYNTAX);
+					SETERRCOL(p);
 					return NULL;
 			} else if (p[6] == ')') {
 				/* Default size of index register is Word */
@@ -194,6 +201,7 @@ opParse(char *p, opDescriptor * d, int *errorPtr)
 				return p + 7;
 			} else {
 				NEWERROR(*errorPtr, SYNTAX);
+				SETERRCOL(p);
 				return NULL;
 			}
 		}
@@ -278,6 +286,7 @@ opParse(char *p, opDescriptor * d, int *errorPtr)
 					} else {
 						NEWERROR(*errorPtr,
 							 SYNTAX);
+						SETERRCOL(p);
 						return NULL;
 				} else if (p[6] == ')') {
 					/* Default size of index register is Word */
@@ -285,6 +294,7 @@ opParse(char *p, opDescriptor * d, int *errorPtr)
 					return p + 7;
 				} else {
 					NEWERROR(*errorPtr, SYNTAX);
+					SETERRCOL(p);
 					return NULL;
 				}
 			}
@@ -316,6 +326,7 @@ opParse(char *p, opDescriptor * d, int *errorPtr)
 					} else {
 						NEWERROR(*errorPtr,
 							 SYNTAX);
+						SETERRCOL(p);
 						return NULL;
 				} else if (p[6] == ')') {
 					/* Default size of index register is Word */
@@ -323,6 +334,7 @@ opParse(char *p, opDescriptor * d, int *errorPtr)
 					return p + 7;
 				} else {
 					NEWERROR(*errorPtr, SYNTAX);
+					SETERRCOL(p);
 					return NULL;
 				}
 			}
@@ -331,5 +343,6 @@ opParse(char *p, opDescriptor * d, int *errorPtr)
 
 	/* If the operand doesn't match any pattern, return an error status */
 	NEWERROR(*errorPtr, SYNTAX);
+	SETERRCOL(p);
 	return NULL;
 }

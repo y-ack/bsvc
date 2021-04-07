@@ -28,13 +28,26 @@
 #include "asm.h"
 
 void
-printError(FILE * outFile, int errorCode, int lineNum)
+printError(FILE * outFile, int errorCode, int lineNum, int col, char *line)
 {
+	col--;
+	char wsbuf[256];
+	int i = 0;
+	while (line[i] == ' ' || line[i] == '\t') {
+		wsbuf[i] = line[i];
+		i++;
+	}
+	wsbuf[i] = '\0';
+
 	char numBuf[20];
 
 	numBuf[0] = '\0';
-	if (lineNum >= 0)
-		snprintf(numBuf, sizeof(numBuf), " in line %d", lineNum);
+	if (lineNum >= 0) {
+		if (col >= 0 && col < 256)
+			snprintf(numBuf, sizeof(numBuf), " at %d:%d", lineNum, col+i);
+		else
+			snprintf(numBuf, sizeof(numBuf), " on line %d", lineNum);
+	}
 
 	switch (errorCode) {
 	case SYNTAX:
@@ -160,5 +173,11 @@ printError(FILE * outFile, int errorCode, int lineNum)
 		else if (errorCode > WARNING)
 			fprintf(outFile, "WARNING%s: No message defined\n",
 				numBuf);
+	}
+
+	if (lineNum >= 0 && errorCode) {
+		fprintf(outFile, line);
+		if (col >= 1 && col < 256)
+			fprintf(outFile, "%s%*s\n", wsbuf, col+2, "~~~");
 	}
 }
