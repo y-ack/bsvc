@@ -107,6 +107,10 @@ processFile(void)
 	}
 }
 
+int iscomment(char c) {
+	return c == '*' || c == ';';
+}
+
 void
 assemble(char *line, int *errorPtr)
 {
@@ -118,7 +122,7 @@ assemble(char *line, int *errorPtr)
 	unsigned short mask, i;
 
 	p = start = skipSpace(line);
-	if (*p && *p != '*') {
+	if (*p && !iscomment(*p)) {
 		i = 0;
 		do {
 			if (i < SIGCHARS)
@@ -130,7 +134,7 @@ assemble(char *line, int *errorPtr)
 			if (*p == ':')
 				p++;
 			p = skipSpace(p);
-			if (*p == '*' || !*p) {
+			if (iscomment(*p) || !*p) {
 				define(label, loc, pass2, errorPtr);
 				return;
 			}
